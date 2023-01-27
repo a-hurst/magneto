@@ -26,8 +26,10 @@ class Magstim(object):
         self._enable_remote_control()
         # If stimulator is a BiStim, configure it into single-pulse mode
         try:
-            self._set_power_b(0)
-            self._set_pulse_interval(1)
+            # TODO: Add an option for choosing type of BiStim single-pulse mode
+            #self._set_power_b(0)
+            #self._set_pulse_interval(1)
+            self._set_pulse_interval(0)
         except RuntimeError:
             pass
 

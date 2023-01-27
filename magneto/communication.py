@@ -157,4 +157,4 @@ def comm_loop(port, q_in, q_out):
             comm.write(ctrl_cmd)
             last_ping = now
 
-        time.sleep(0.05)
+        time.sleep(0.01)

@@ -5,7 +5,7 @@ from queue import Queue
 import serial
 
 from .constants import *
-from .utils import build_command, validate_response, int_to_ascii, _check_error
+from .utils import build_command, int_to_ascii, _check_error
 
 
 resp_lengths = {

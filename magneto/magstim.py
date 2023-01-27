@@ -120,10 +120,11 @@ class Magstim(object):
 
     @property
     def armed(self):
+        # NOTE: When magstim is ready 'armed' bit is set to 0, so need to check both
         self._send_cmd(ENABLE_REMOTE_CTRL)
         resp = self._wait_for_reply(ENABLE_REMOTE_CTRL)
         _validate_response(resp)
-        return self._status.armed
+        return self._status.armed or self._status.ready
     
     @property
     def ready(self):

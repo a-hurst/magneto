@@ -3,7 +3,7 @@ import serial
 from .constants import *
 
 
-class CRCError(Exception):
+class CRCError(RuntimeError):
     pass
 
 

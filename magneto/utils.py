@@ -1,4 +1,5 @@
 import serial
+from serial.tools.list_ports import comports
 
 from .constants import *
 
@@ -61,3 +62,7 @@ def _validate_response(resp):
     elif resp.err == CRC_ERROR:
         e = "Magstim response failed CRC integrity check ({0})."
         raise CRCError(e.format(resp._raw))
+
+def _get_available_ports():
+    # Returns a list of all available serial ports
+    return [p.device for p in comports()]

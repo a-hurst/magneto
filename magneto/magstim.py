@@ -235,6 +235,10 @@ class Magstim(object):
 
     @property
     def status(self):
+        """:obj:`~magneto.MagstimStatus`: The most recent status update from the
+        stimulator.
+
+        """
         # Retrieves status information from the last response from the magstim
         self._pump()
         return self._status

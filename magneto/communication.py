@@ -47,7 +47,12 @@ class Response(object):
 
 
 class MagstimStatus(object):
-    
+    """A class for representing system status updates from the stimulator.
+
+    Args:
+        status (int): The status byte from a Magstim response packet.
+
+    """
     def __init__(self, status):
         if isinstance(status, bytes):
             status = int.from_bytes(status, "little")
@@ -65,34 +70,64 @@ class MagstimStatus(object):
         
     @property
     def standby(self):
+        """bool: True if the unit is in standby mode (i.e. disarmed), otherwise False.
+
+        """
         return self._check_bit(STATUS_STANDBY)
         
     @property
     def armed(self):
+        """bool: True if the unit has been armed, but is not yet ready to fire.
+
+        .. note:: As soon as the stimulator is ready to fire, this becomes False.
+
+        """
         return self._check_bit(STATUS_ARMED)
 
     @property
     def ready(self):
+        """bool: True if the unit is ready to fire, otherwise False.
+
+        """
         return self._check_bit(STATUS_READY)
         
     @property
     def coil_present(self):
+        """bool: True if a coil is currently connected to the unit, otherwise False.
+
+        """
+        # NOTE: Check this on startup/throughout session?
         return self._check_bit(STATUS_COIL_PRESENT)
         
     @property
     def replace_coil(self):
+        """bool: True if the connected coil needs to be replaced, otherwise False.
+        
+        """
+        # NOTE: Check this on startup/throughout session?
         return self._check_bit(STATUS_REPLACE_COIL)
 
     @property
     def err(self):
+        """bool: True if an error code is present for the unit, otherwise False.
+        
+        """
         return self._check_bit(STATUS_ERR)
 
     @property
     def fatal_err(self):
+        """bool: True if the unit has encountered a fatal error, otherwise False.
+        
+        """
+        # NOTE: Check this on startup/throughout session (& report error code)?
         return self._check_bit(STATUS_ERR_TYPE)
         
     @property
     def remote_control(self):
+        """bool: True if the unit is currently being controlled over the serial port
+        (i.e. by magneto), otherwise False.
+        
+        """
         return self._check_bit(STATUS_REMOTE_CTRL)
 
 

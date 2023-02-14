@@ -105,6 +105,28 @@ class Magstim(object):
         # Disables remote control over the stimulator. Unsure if this should be public.
         return self._communicate(DISABLE_REMOTE_CTRL)
 
+    def _get_settings(self):
+        # Gets power A, power B, & pulse interval on all models. Power B & pulse 
+        # interval are both BiStim-specific, so this is private for the base class.
+        self._send_cmd(GET_PARAMS)
+        resp = self._wait_for_reply(GET_PARAMS)
+        _validate_response(resp)
+        if len(resp.data) != 9:
+            raise RuntimeError("Error parsing Magstim settings.")
+        pwr_a = int(resp.data[:3])
+        pwr_b = int(resp.data[3:6])
+        pulse_interval = int(resp.data[6:])
+        return (pwr_a, pwr_b, pulse_interval)
+
+    def get_power(self):
+        """Gets the current power level for the primary coil of the stimulator.
+
+        Returns:
+            int: The primary coil's current power level (from 0% to 100%).
+
+        """
+        return self._get_settings()[0]
+
     def set_power(self, value):
         """Sets the power level for the primary coil of the stimulator.
 
@@ -162,17 +184,6 @@ class Magstim(object):
         """
         trigger = get_mode_byte(MODE_TRIGGER)
         return self._communicate(SET_BASE_MODE, trigger)
-
-    def get_settings(self):
-        self._send_cmd(GET_PARAMS)
-        resp = self._wait_for_reply(GET_PARAMS)
-        _validate_response(resp)
-        if len(resp.data) != 9:
-            raise RuntimeError("Error parsing Magstim settings.")
-        pwr_a = int(resp.data[:3])
-        pwr_b = int(resp.data[3:6])
-        pulse_interval = int(resp.data[6:])
-        return (pwr_a, pwr_b, pulse_interval)
 
     def _set_power_b(self, value):
         # BiStim-only: sets the power level for the second pulse when in

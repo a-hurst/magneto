@@ -206,8 +206,8 @@ class Magstim(object):
         # BiStim-only: sets the paired-pulse interval for the stimulator
         # NOTE: Setting the interval to 0 enables simultaneous-discharge mode
         # NOTE: No obvious way to check current pulse interval resolution
-        if not (0 <= value <= 100):
-            e = "Pulse interval must be a value between 0 and 100 (got {0})"
+        if not (0 <= value <= 999):
+            e = "Pulse interval must be a value between 0 and 999 ms (got {0})"
             raise ValueError(e.format(value))
         interval = int_to_ascii(value, width=3)
         return self._communicate(SET_PULSE_INTERVAL, interval)

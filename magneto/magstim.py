@@ -63,7 +63,7 @@ class Magstim(object):
             else:
                 self._set_pulse_interval(1)
                 self._set_power_b(0)
-        except RuntimeError:
+        except ValueError:
             pass
 
     def _pump(self):

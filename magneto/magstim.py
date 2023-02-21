@@ -61,7 +61,7 @@ class Magstim(object):
             if self._simultaneous:
                 self._set_pulse_interval(0)
             else:
-                self._set_pulse_interval(1)
+                self._set_pulse_interval(10)
                 self._set_power_b(0)
         except ValueError:
             pass

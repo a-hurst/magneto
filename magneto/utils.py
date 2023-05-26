@@ -29,6 +29,8 @@ class CRCError(RuntimeError):
 def byteify(x, enc='ascii'):
     if type(x) == str:
         return x.encode(enc)
+    elif type(x) == int:
+        return x.to_bytes(1, byteorder='little')
     else:
         return bytes(x)
 
@@ -38,7 +40,7 @@ def int_to_ascii(num, width=1):
 
 def calculate_crc(cmd):
     bytesum = sum([int(b) for b in byteify(cmd)])
-    return byteify(chr(~bytesum & 0xFF))
+    return byteify(~bytesum & 0xFF)
 
 def get_mode_byte(setting):
     return chr((1 << MODE_BASE) + (1 << setting))

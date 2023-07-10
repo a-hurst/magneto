@@ -33,6 +33,8 @@ class Magstim(object):
         self._status = None
         self._to_stim = Queue()
         self._from_stim = Queue()
+        self._debug_log = []
+        self._onset = None
         self._com_thread = None
         self._simultaneous = bistim_sd
 
@@ -54,6 +56,7 @@ class Magstim(object):
         self._com_thread.start()
 
         # Request computer control over the Magstim
+        self._onset = time.perf_counter() # timestamp for debug logs
         self._enable_remote_control()
 
         # If stimulator is a BiStim, configure it into single-pulse mode
@@ -66,11 +69,18 @@ class Magstim(object):
         except ValueError:
             pass
 
+    def _log(self, packet, recieved=False):
+        # Logs sent/recieved packet bytes to an internal log for debugging
+        timestamp = (time.perf_counter() - self._onset) * 1000
+        self._debug_log.append((recieved, packet, timestamp))
+        self._debug_log = self._debug_log[-16:] # Only keep last 16
+
     def _pump(self):
         # Pumps the TMS input queue for new response packets
         out = []
         while not self._from_stim.empty():
             resp_bytes = self._from_stim.get()
+            self._log(resp_bytes, recieved=True)
             resp = Response(resp_bytes)
             if not resp.err:
                 self._status = MagstimStatus(resp.status)
@@ -79,7 +89,9 @@ class Magstim(object):
 
     def _send_cmd(self, cmd, data=None):
         # Sends a command to the Magstim
-        self._to_stim.put(build_command(cmd, data))
+        cmd_bytes = build_command(cmd, data)
+        self._log(cmd_bytes)
+        self._to_stim.put(cmd_bytes)
 
     def _wait_for_reply(self, cmd, timeout=1.0):
         # Waits for a response packet corresponding to a given command
@@ -88,14 +100,51 @@ class Magstim(object):
             for resp in self._pump():
                 if resp.cmd == cmd or resp.err == INVALID_CMD:
                     return resp
+        # NOTE: Raise actual exception of some kind on timeout instead of just
+        #       returning None
+        # NOTE: Add some sort of check whether connect() has been run
 
     def _communicate(self, cmd, data=None):
         # Sends a command to the magstim and wait for a response, returning its
         # current status if no error in the response
         self._send_cmd(cmd, data)
         resp = self._wait_for_reply(cmd)
-        _validate_response(resp)
+        self._validate_response(resp)
         return resp.status
+
+    def _get_debug_info(self):
+        # Prints out debug info about the comm history and state of the magstim
+        out = ["\n> Magstim Communication History:"]
+        for recieved, packet, timestamp in self._debug_log:
+            tmp = " - {0}{1}  [{2}]  ({3})"
+            prefix = "In:  " if recieved else "Out: "
+            to_hex = " ".join(["{:02X}".format(b) for b in packet])
+            out.append(tmp.format(
+                prefix, str(packet).ljust(9), to_hex, "{:.1f}".format(timestamp)
+            ))
+        out.append("\n> Magstim System Status:")
+        status = {
+            "Standby": self._status.standby,
+            "Armed": self._status.armed,
+            "Ready": self._status.ready,
+            "Coil Present": self._status.coil_present,
+            "Replace Coil": self._status.replace_coil,
+            "Error Code": self._status.err,
+            "Fatal Error": self._status.fatal_err,
+            "Remote Control": self._status.remote_control,
+        }
+        for field, value in status.items():
+            out.append(" - {0}: {1}".format(field, value == 1))
+        return "\n".join(out) + "\n"
+
+    def _validate_response(self, resp):
+        # Checks response for errors and provides detailed debug info if any
+        # encountered.
+        try:
+            _validate_response(resp)
+        except (RuntimeError, ValueError) as e:
+            print(self._get_debug_info())
+            raise e
 
     def _enable_remote_control(self):
         # Enables remote control over the stimulator. Unsure if this should be public.
@@ -110,7 +159,7 @@ class Magstim(object):
         # interval are both BiStim-specific, so this is private for the base class.
         self._send_cmd(GET_PARAMS)
         resp = self._wait_for_reply(GET_PARAMS)
-        _validate_response(resp)
+        self._validate_response(resp)
         if len(resp.data) != 9:
             raise RuntimeError("Error parsing Magstim settings.")
         pwr_a = int(resp.data[:3])
@@ -220,7 +269,7 @@ class Magstim(object):
         # NOTE: When magstim is ready 'armed' bit is set to 0, so need to check both
         self._send_cmd(ENABLE_REMOTE_CTRL)
         resp = self._wait_for_reply(ENABLE_REMOTE_CTRL)
-        _validate_response(resp)
+        self._validate_response(resp)
         return self._status.armed or self._status.ready
     
     @property
@@ -230,7 +279,7 @@ class Magstim(object):
         """
         self._send_cmd(ENABLE_REMOTE_CTRL)
         resp = self._wait_for_reply(ENABLE_REMOTE_CTRL)
-        _validate_response(resp)
+        self._validate_response(resp)
         return self._status.ready
 
     @property

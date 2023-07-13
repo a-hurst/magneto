@@ -148,6 +148,10 @@ class Magstim(object):
 
     def _enable_remote_control(self):
         # Enables remote control over the stimulator. Unsure if this should be public.
+        # NOTE: Because comms thread uses 'ENABLE_REMOTE_CTRL' packets to keep the
+        #       Magstim connection alive, need to flush the existing queue contents
+        #       to avoid mistaking old responses for reply to current command
+        self._pump()
         return self._communicate(ENABLE_REMOTE_CTRL)
 
     def _disable_remote_control(self):
@@ -268,6 +272,7 @@ class Magstim(object):
         """
         # NOTE: When magstim is ready 'armed' bit is set to 0, so need to check both
         self._send_cmd(ENABLE_REMOTE_CTRL)
+        self._pump() # Flush any old ENABLE_REMOTE_CTRL responses from queue
         resp = self._wait_for_reply(ENABLE_REMOTE_CTRL)
         self._validate_response(resp)
         return self._status.armed or self._status.ready
@@ -278,6 +283,7 @@ class Magstim(object):
 
         """
         self._send_cmd(ENABLE_REMOTE_CTRL)
+        self._pump() # Flush any old ENABLE_REMOTE_CTRL responses from queue
         resp = self._wait_for_reply(ENABLE_REMOTE_CTRL)
         self._validate_response(resp)
         return self._status.ready

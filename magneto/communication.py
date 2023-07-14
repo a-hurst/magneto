@@ -184,11 +184,13 @@ def comm_loop(port, q_in, q_out):
         now = time.time()
         if not q_out.empty():
             cmd = q_out.get()
+            print("> CMD [{}]: {:.3f} sec since last".format(cmd, now - last_ping))
             comm.write(cmd)
             last_ping = now
 
         # If no command sent for a while, ping the unit to maintain control
         if (now - last_ping) > ping_freq:
+            print("> Ping: {:.3f} sec since last".format(now - last_ping))
             comm.write(ctrl_cmd)
             last_ping = now
 

@@ -95,8 +95,8 @@ class Magstim(object):
 
     def _wait_for_reply(self, cmd, timeout=1.0):
         # Waits for a response packet corresponding to a given command
-        start = time.time()
-        while (time.time() - start) < timeout:
+        start = time.monotonic()
+        while (time.monotonic() - start) < timeout:
             for resp in self._pump():
                 if resp.cmd == cmd or resp.err == INVALID_CMD:
                     return resp

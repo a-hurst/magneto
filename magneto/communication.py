@@ -165,7 +165,7 @@ def comm_loop(port, q_in, q_out):
     # each response character & ensure that many bytes have been read before
     # passing to the main thread? 
     ctrl_cmd = build_command(ENABLE_REMOTE_CTRL)
-    last_ping = time.time()
+    last_ping = time.perf_counter()
     ping_freq = 0.5
 
     buf = b"" # serial port input buffer
@@ -181,7 +181,7 @@ def comm_loop(port, q_in, q_out):
                 q_in.put(resp)
         
         # Send any queued commands
-        now = time.time()
+        now = time.perf_counter()
         if not q_out.empty():
             cmd = q_out.get()
             comm.write(cmd)

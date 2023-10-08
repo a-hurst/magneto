@@ -46,7 +46,6 @@ class Magstim(object):
         attributes can be used.
 
         """
-        # TODO: Add logic for ensuring connection exists in other methods/attrs
         # Initializes the Magstim serial communication thread
         self._com_thread = threading.Thread(
             target=comm_loop,
@@ -89,6 +88,9 @@ class Magstim(object):
 
     def _send_cmd(self, cmd, data=None):
         # Sends a command to the Magstim
+        if self._com_thread is None:
+            e = "Serial control over Magstim has not been established."
+            raise RuntimeError(e)
         cmd_bytes = build_command(cmd, data)
         self._log(cmd_bytes)
         self._to_stim.put(cmd_bytes)
@@ -102,7 +104,6 @@ class Magstim(object):
                     return resp
         # NOTE: Raise actual exception of some kind on timeout instead of just
         #       returning None
-        # NOTE: Add some sort of check whether connect() has been run
 
     def _communicate(self, cmd, data=None):
         # Sends a command to the magstim and wait for a response, returning its

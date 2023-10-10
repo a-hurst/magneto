@@ -18,6 +18,8 @@ resp_lengths = {
     ENABLE_HIRES_TIME: 3,
     DISABLE_HIRES_TIME: 3,
     GET_PARAMS: 12,
+    GET_SYSTEM_MODE: 3,
+    GET_SYSTEM_TYPE: 6,
 }
 
 

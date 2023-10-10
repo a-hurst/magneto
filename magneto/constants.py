@@ -12,6 +12,12 @@ GET_VERSION = 0x4E
 GET_ERR_CODE = 0x49
 
 
+# Undocumented commands
+
+GET_SYSTEM_TYPE = 0x4B
+GET_SYSTEM_MODE = 0x58
+
+
 # BiStim-specific commands
 
 SET_POWER_B = 0x41
@@ -82,6 +88,30 @@ INVALID_DATA = ord('?')
 SETTINGS_CONFLICT = ord('S')
 
 
+# Undocumented command constants
+
+SYSTEM_TYPE_RAPID = b'3012' # 3010 for Magstim 200/BiStim, but Signal 6 only checks if Rapid
+
+
 # Magneto constants not from Magstim docs
 
 CRC_ERROR = -1
+
+SYSTEM_MODE_200 = 1
+SYSTEM_MODE_BISTIM = 2
+SYSTEM_MODE_BISTIM_IBT = 3
+SYSTEM_MODE_BISTIM_WRONG_PORT = 4
+SYSTEM_MODE_UNKNOWN -1
+
+# Based on decompiled switch statement from Signal 6.06 Magstim DLL
+SYSTEM_MODE_MAP = {
+    0x30: SYSTEM_MODE_200,
+    0x31: SYSTEM_MODE_BISTIM,
+    0x32: SYSTEM_MODE_BISTIM,
+    0x33: SYSTEM_MODE_BISTIM_IBT,
+    0x34: SYSTEM_MODE_BISTIM,
+    0x51: SYSTEM_MODE_BISTIM_WRONG_PORT,
+    0x52: SYSTEM_MODE_BISTIM_WRONG_PORT,
+    0x53: SYSTEM_MODE_BISTIM_WRONG_PORT,
+    0x54: SYSTEM_MODE_BISTIM_WRONG_PORT,
+}

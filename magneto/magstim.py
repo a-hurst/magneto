@@ -159,6 +159,23 @@ class Magstim(object):
         # Disables remote control over the stimulator. Unsure if this should be public.
         return self._communicate(DISABLE_REMOTE_CTRL)
 
+    def _get_system_type(self):
+        # (Undocumented) Gets the product family for the stimulator. Currently only
+        # differentiates between Rapid stimulators vs other types.
+        self._send_cmd(GET_SYSTEM_TYPE)
+        resp = self._wait_for_reply(GET_SYSTEM_TYPE)
+        self._validate_response(resp)
+        return resp.data
+
+    def _get_system_mode(self):
+        # (Undocumented) Gets the system mode (model + config) for 200/Bistim units
+        self._send_cmd(GET_SYSTEM_MODE)
+        resp = self._wait_for_reply(GET_SYSTEM_MODE)
+        self._validate_response(resp)
+        if int(resp) not in SYSTEM_MODE_MAP.keys():
+            return SYSTEM_MODE_UNKNOWN
+        return SYSTEM_MODE_MAP[int(resp)]
+
     def _get_settings(self):
         # Gets power A, power B, & pulse interval on all models. Power B & pulse 
         # interval are both BiStim-specific, so this is private for the base class.

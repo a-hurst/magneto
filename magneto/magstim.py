@@ -81,7 +81,7 @@ class Magstim(object):
             resp_bytes = self._from_stim.get()
             self._log(resp_bytes, recieved=True)
             resp = Response(resp_bytes)
-            if not resp.err:
+            if resp.status:
                 self._status = MagstimStatus(resp.status)
             out.append(resp)
         return out
@@ -162,7 +162,7 @@ class Magstim(object):
     def _get_system_type(self):
         # (Undocumented) Gets the product family for the stimulator. Currently only
         # differentiates between Rapid stimulators vs other types.
-        self._send_cmd(GET_SYSTEM_TYPE)
+        self._send_cmd(GET_SYSTEM_TYPE, data=0x44)
         resp = self._wait_for_reply(GET_SYSTEM_TYPE)
         self._validate_response(resp)
         return resp.data

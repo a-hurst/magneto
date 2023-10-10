@@ -18,7 +18,7 @@ resp_lengths = {
     ENABLE_HIRES_TIME: 3,
     DISABLE_HIRES_TIME: 3,
     GET_PARAMS: 12,
-    GET_SYSTEM_MODE: 3,
+    GET_SYSTEM_MODE: 4,
     GET_SYSTEM_TYPE: 6,
 }
 
@@ -31,16 +31,23 @@ class Response(object):
 
     @property
     def cmd(self):
+        # The type of command (e.g. GET_PARAMS) the response is replying to
         return self._raw[0]
 
     @property
     def status(self):
-        # NOTE: Missing for Rapid 'software version' responses
-        return None if self._err else self._raw[1]
+        # The byte indicating the current Magstim status (absent for some commands)
+        if self.err or self.cmd in CMD_NO_STATUS:
+            return None
+        return self._raw[1]
 
     @property
     def data(self):
-        return self._raw[2:-1]
+        # The data bytes (if any) contained within the response
+        if self.cmd in CMD_NO_STATUS:
+            return self._raw[1:-1]
+        else:
+            return self._raw[2:-1]
 
     @property
     def err(self):

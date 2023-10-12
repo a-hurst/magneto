@@ -172,9 +172,9 @@ class Magstim(object):
         self._send_cmd(GET_SYSTEM_MODE)
         resp = self._wait_for_reply(GET_SYSTEM_MODE)
         self._validate_response(resp)
-        if int(resp) not in SYSTEM_MODE_MAP.keys():
+        if int(resp.data) not in SYSTEM_MODE_MAP.keys():
             return SYSTEM_MODE_UNKNOWN
-        return SYSTEM_MODE_MAP[int(resp)]
+        return SYSTEM_MODE_MAP[int(resp.data)]
 
     def _get_settings(self):
         # Gets power A, power B, & pulse interval on all models. Power B & pulse 
@@ -237,7 +237,7 @@ class Magstim(object):
         See :meth:`arm` for more information.
         
         """
-        disarmed = get_mode_byte(0)
+        disarmed = get_mode_byte(MODE_STOPPED)
         return self._communicate(SET_BASE_MODE, disarmed)
     
     def fire(self):

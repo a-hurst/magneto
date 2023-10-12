@@ -12,6 +12,8 @@ magneto 0.0.3
   communication error occurs with the stimulator.
 * Fixed rare startup crash when Magstim sends a message consisting only of null
   bytes.
+* Added a check to ensure the requested serial port exists on the system when
+  initializing a Magstim class, raising an informative exception if it doesn't.
 
 
 magneto 0.0.2

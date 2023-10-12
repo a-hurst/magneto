@@ -3,7 +3,10 @@ import threading
 from queue import Queue
 
 from .constants import *
-from .utils import build_command, get_mode_byte, int_to_ascii, _validate_response
+from .utils import (
+    build_command, get_mode_byte, int_to_ascii, _validate_response,
+    _get_available_ports,
+)
 from .communication import Response, MagstimStatus, _serial_connect, comm_loop
 
 
@@ -29,7 +32,7 @@ class Magstim(object):
 
     """
     def __init__(self, port, bistim_sd=True):
-        self._port = port
+        self._port = self._validate_port(port)
         self._status = None
         self._to_stim = Queue()
         self._from_stim = Queue()
@@ -37,6 +40,21 @@ class Magstim(object):
         self._onset = None
         self._com_thread = None
         self._simultaneous = bistim_sd
+
+    def _validate_port(self, port):
+        # Makes sure the requested serial port exists, raising an informative exception
+        # if it doesn't
+        ports = _get_available_ports()
+        if not len(ports):
+            raise RuntimeError(
+                "No serial ports available, please make sure your serial adapter is "
+                "plugged in!"
+            )
+        if port not in ports:
+            e = "Serial port '{0}' does not exist on this system, please try a "
+            e += "different one (available ports: ['{1}'])"
+            raise RuntimeError(e.format(port, "', '".join(ports)))
+        return port
 
     def connect(self):
         """Initializes the connection to the stimulator.

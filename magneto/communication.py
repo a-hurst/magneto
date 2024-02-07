@@ -136,6 +136,8 @@ def _get_resp_bytes(raw):
     # response bytes from the beginning of the buffer + the remaining
     # buffer with those bytes removed
     resp_bytes = 0
+    if not len(raw):
+        return (b"", b"")
     if raw[0] == INVALID_CMD:
         resp_bytes = 1
     elif len(raw) >= 3:

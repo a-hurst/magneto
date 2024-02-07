@@ -10,6 +10,8 @@ magneto 0.0.3
   called.
 * Added detailed debug printing of the serial communcations log when a
   communication error occurs with the stimulator.
+* Fixed rare startup crash when Magstim sends a message consisting only of null
+  bytes.
 
 
 magneto 0.0.2

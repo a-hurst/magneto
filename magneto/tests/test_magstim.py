@@ -1,5 +1,7 @@
 
 import pytest
+from unittest import mock
+
 import time
 from queue import Queue
 from magneto import Magstim
@@ -11,7 +13,9 @@ from magneto.constants import *
 
 @pytest.fixture()
 def mockstim():
-    tst = Magstim("COM1")
+    with mock.patch("magneto.magstim._get_available_ports") as get_ports:
+        get_ports.return_value = ['COM1']
+        tst = Magstim("COM1")
     tst._from_stim = Queue()
     tst._to_stim = Queue()
     tst._com_thread = True
@@ -26,7 +30,11 @@ def add_to_queue(magstim, cmds):
 class TestMagstim(object):
 
     def test_init(self):
-        tst = Magstim("COM1")
+        with mock.patch("magneto.magstim._get_available_ports") as get_ports:
+            get_ports.return_value = ['COM1', 'COM4']
+            tst = Magstim("COM1")
+            with pytest.raises(RuntimeError):
+                tst = Magstim("COM3")
 
     def test_pump(self, mockstim):
         tst = mockstim

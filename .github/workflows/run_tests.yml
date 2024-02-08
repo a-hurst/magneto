@@ -2,11 +2,11 @@ name: Tests
 
 on:
   push:
-    branches: [ testing ]
+    branches: [ main ]
   pull_request:
-    branches: [ testing ]
+    branches: [ main ]
   create:
-    branches: [ testing ]
+    branches: [ main ]
     tags: ['**']
 
 

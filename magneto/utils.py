@@ -85,4 +85,4 @@ def _validate_response(resp):
 
 def _get_available_ports():
     # Returns a list of all available serial ports
-    return [p.device for p in comports()]
+    return [p.device for p in comports() if not "Bluetooth" in p.device]
